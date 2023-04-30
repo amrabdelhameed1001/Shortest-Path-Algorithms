@@ -1,133 +1,133 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.io.*;
+
 public class Graph {
-    private int V;                  // number of vertices
-    private int E;                  // number of edges
-    private List<Edge> edges;       // list of edges
+    private int V; // number of vertices
+    private LinkedList<Edge>[] adj; // adjacency list representation
 
-    public Graph(String path){
-        try(BufferedReader br = new BufferedReader(new FileReader(path))){
-            String[] line = br.readLine().split(" ");
-            V = Integer.parseInt(line[0]);
-            E = Integer.parseInt(line[1]);
-            edges = new ArrayList<>();
-            for(int i=0 ; i<E ; i++){
-                line = br.readLine().split(" ");
-                int src = Integer.parseInt(line[0]);
-                int dest = Integer.parseInt(line[1]);
-                int weight = Integer.parseInt(line[2]);
-                edges.add(new Edge(src, dest , weight));
-
-            }
-
-        }
-        catch (IOException e){
-            e.printStackTrace();
-        }
-    }
-
-    public int size(){
-        return V;
-    }
-
-    private class Edge{
-        int src;
+    // Edge class to represent weighted edges in the graph
+    private class Edge {
         int dest;
         int weight;
-        public Edge(int src , int dest , int weight){
-            this.src = src;
+        Edge(int dest, int weight) {
             this.dest = dest;
             this.weight = weight;
         }
     }
 
-    private int minDistance(int[] costs , boolean[] visited){
-        int min = Integer.MAX_VALUE;
-        int minIndex = -1;
-        for(int i=0 ; i<V ; i++){
-            if(!visited[i] && costs[i] <= min){
-                min = costs[i];
-                minIndex = i;
-            }
+    // Initialize the graph from a file
+    public Graph(String filename) throws FileNotFoundException {
+        Scanner scanner = new Scanner(new File(filename));
+        this.V = scanner.nextInt();
+        this.adj = new LinkedList[V];
+        for (int i = 0; i < V; i++) {
+            adj[i] = new LinkedList<Edge>();
         }
-        return minIndex;
+        while (scanner.hasNextInt()) {
+            int u = scanner.nextInt();
+            int v = scanner.nextInt();
+            int w = scanner.nextInt();
+            addEdge(u, v, w);
+        }
+        scanner.close();
     }
 
-    public void dijkstra(int src, int[] costs, int[] parents) {
-        boolean[] visited = new boolean[V];
+    // Add an edge to the graph
+    public void addEdge(int u, int v, int w) {
+        adj[u].add(new Edge(v, w));
+        adj[v].add(new Edge(u, w));
+    }
+
+    // Returns the number of nodes in the graph
+    public int size() {
+        return V;
+    }
+
+    // Dijkstra's shortest path algorithm
+    public void dijkstra(int source, int[] costs, int[] parents) {
+        PriorityQueue<Edge> pq = new PriorityQueue<Edge>((a, b) -> a.weight - b.weight);
+        pq.offer(new Edge(source, 0));
         Arrays.fill(costs, Integer.MAX_VALUE);
+        costs[source] = 0;
         Arrays.fill(parents, -1);
-        costs[src] = 0;
-        for (int i = 0; i < V - 1; i++) {
-            int u = minDistance(costs, visited);
-            visited[u] = true;
-            for (Edge e : edges) {
-                if (e.src == u && !visited[e.dest] && costs[u] != Integer.MAX_VALUE && costs[u] + e.weight < costs[e.dest]) {
-                    costs[e.dest] = costs[u] + e.weight;
-                    parents[e.dest] = u;
+        while (!pq.isEmpty()) {
+            Edge cur = pq.poll();
+            int u = cur.dest;
+            int w = cur.weight;
+            if (w > costs[u]) continue;
+            for (Edge e : adj[u]) {
+                int v = e.dest;
+                int newCost = costs[u] + e.weight;
+                if (newCost < costs[v]) {
+                    costs[v] = newCost;
+                    parents[v] = u;
+                    pq.offer(new Edge(v, newCost));
                 }
             }
         }
     }
 
+    // Bellman-Ford shortest path algorithm
     public boolean bellmanFord(int source, int[] costs, int[] parents) {
-        // Initialize the costs array and parents array
         Arrays.fill(costs, Integer.MAX_VALUE);
         Arrays.fill(parents, -1);
         costs[source] = 0;
-
-        // Relax all edges V-1 times
         for (int i = 0; i < V - 1; i++) {
-            for (Edge edge : edges) {
-                int u = edge.src;
-                int v = edge.dest;
-                int weight = edge.weight;
-                if (costs[u] != Integer.MAX_VALUE && costs[u] + weight < costs[v]) {
-                    costs[v] = costs[u] + weight;
-                    parents[v] = u;
+            for (int u = 0; u < V; u++) {
+                for (Edge e : adj[u]) {
+                    int v = e.dest;
+                    int w = e.weight;
+                    if (costs[u] != Integer.MAX_VALUE && costs[u] + w < costs[v]) {
+                        costs[v] = costs[u] + w;
+                        parents[v] = u;
+                    }
                 }
             }
         }
-
-        // Check for negative cycles
-        for (Edge edge : edges) {
-            int u = edge.src;
-            int v = edge.dest;
-            int weight = edge.weight;
-            if (costs[u] != Integer.MAX_VALUE && costs[u] + weight < costs[v]) {
-                return false;
+        // check for negative cycles
+        for (int u = 0; u < V; u++) {
+            for (Edge e : adj[u]) {
+                int v = e.dest;
+                int w = e.weight;
+                if (costs[u] != Integer.MAX_VALUE && costs[u] + w < costs[v]) {
+                    return false; // negative cycle found
+                }
             }
         }
-
         return true;
     }
 
+    // Floyd-Warshall shortest path algorithm
     public boolean floydWarshall(int[][] costs, int[][] predecessors) {
         for (int i = 0; i < V; i++) {
             for (int j = 0; j < V; j++) {
-                costs[i][j] = Integer.MAX_VALUE;
-                predecessors[i][j] = -1;
+                if (i == j) {
+                    costs[i][j] = 0;
+                    predecessors[i][j] = -1;
+                } else {
+                    costs[i][j] = Integer.MAX_VALUE;
+                    predecessors[i][j] = -1;
+                }
             }
-            costs[i][i] = 0;
-        }
-        for (Edge e : edges) {
-            costs[e.src][e.dest] = e.weight;
-            predecessors[e.src][e.dest] = e.src;
+            for (Edge e : adj[i]) {
+                int j = e.dest;
+                int w = e.weight;
+                costs[i][j] = w;
+                predecessors[i][j] = i;
+            }
         }
         for (int k = 0; k < V; k++) {
             for (int i = 0; i < V; i++) {
                 for (int j = 0; j < V; j++) {
-                    if (costs[i][k] != Integer.MAX_VALUE && costs[k][j] != Integer.MAX_VALUE && costs[i][k] + costs[k][j] < costs[i][j]) {
+                    if (costs[i][k] != Integer.MAX_VALUE && costs[k][j] != Integer.MAX_VALUE &&
+                            costs[i][k] + costs[k][j] < costs[i][j]) {
                         costs[i][j] = costs[i][k] + costs[k][j];
                         predecessors[i][j] = predecessors[k][j];
                     }
                 }
             }
         }
+        // check for negative cycles
         for (int i = 0; i < V; i++) {
             if (costs[i][i] < 0) {
                 return false; // negative cycle found
@@ -135,5 +135,4 @@ public class Graph {
         }
         return true;
     }
-
 }
