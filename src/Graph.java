@@ -23,6 +23,7 @@ public class Graph {
         for (int i = 0; i < V; i++) {
             adj[i] = new LinkedList<Edge>();
         }
+        scanner.nextInt();
         while (scanner.hasNextInt()) {
             int u = scanner.nextInt();
             int v = scanner.nextInt();
