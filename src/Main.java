@@ -20,24 +20,28 @@ public class Main {
         System.out.println("Dijkstra's algorithm results:");
         System.out.println("Costs: " + Arrays.toString(costs));
         System.out.println("Parents: " + Arrays.toString(parents));
-
+        System.out.println("--------------------------------------------");
+        
         // Test Bellman-Ford algorithm
-        //int[] costs2 = new int[g.size()];
-        //int[] parents2 = new int[g.size()];
-        boolean hasNegativeCycle = g.bellmanFord(source, costs, parents);
+        int[] costs2 = new int[g.size()];
+        int[] parents2 = new int[g.size()];
+        boolean hasNegativeCycle = g.bellmanFord(source, costs2, parents2);
         System.out.println("bellmanFord's algorithm results:");
         if (hasNegativeCycle) {
             System.out.println("No negative cycle found");
-            System.out.println("Costs: " + Arrays.toString(costs));
-            System.out.println("Parents: " + Arrays.toString(parents));
+            System.out.println("Costs: " + Arrays.toString(costs2));
+            System.out.println("Parents: " + Arrays.toString(parents2));
         } else {
             System.out.println("Negative cycle found");
         }
+        System.out.println("--------------------------------------------");
 
         // Floyd-Warshall algorithm
         int[][] costsMatrix = new int[g.size()][g.size()];
         int[][] predecessorsMatrix = new int[g.size()][g.size()];
         result = g.floydWarshall(costsMatrix, predecessorsMatrix);
+
+        System.out.println("FloydWarshall's algorithm results:");
         if (result) {
             for (int i = 0; i < g.size(); i++) {
                 for (int j = 0; j < g.size(); j++) {
