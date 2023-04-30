@@ -34,17 +34,39 @@ public class Graph {
         return V;
     }
 
-    public void dijkstra(int src , int[] costs , int[] parents){
+    private class Edge{
+        int src;
+        int dest;
+        int weight;
+        public Edge(int src , int dest , int weight){
+            this.src = src;
+            this.dest = dest;
+            this.weight = weight;
+        }
+    }
+
+    private int minDistance(int[] costs , boolean[] visited){
+        int min = Integer.MAX_VALUE;
+        int minIndex = -1;
+        for(int i=0 ; i<V ; i++){
+            if(!visited[i] && costs[i] <= min){
+                min = costs[i];
+                minIndex = i;
+            }
+        }
+        return minIndex;
+    }
+
+    public void dijkstra(int src, int[] costs, int[] parents) {
         boolean[] visited = new boolean[V];
         Arrays.fill(costs, Integer.MAX_VALUE);
         Arrays.fill(parents, -1);
-        costs[src]= 0;
-
-        for(int i=0 ; i<V-1 ; i++){
-            int u = minDistance(costs , visited);
+        costs[src] = 0;
+        for (int i = 0; i < V - 1; i++) {
+            int u = minDistance(costs, visited);
             visited[u] = true;
-            for(Edge e : edges){
-                if(e.src == u && !visited[e.dest] && costs[u] != Integer.MAX_VALUE && costs[u] + e.weight < costs[e.dest]){
+            for (Edge e : edges) {
+                if (e.src == u && !visited[e.dest] && costs[u] != Integer.MAX_VALUE && costs[u] + e.weight < costs[e.dest]) {
                     costs[e.dest] = costs[u] + e.weight;
                     parents[e.dest] = u;
                 }
@@ -113,26 +135,5 @@ public class Graph {
         }
         return true;
     }
-    private int minDistance(int[] costs , boolean[] visited){
-        int min = Integer.MAX_VALUE;
-        int minIndex = -1;
-        for(int i=0 ; i<V ; i++){
-            if(!visited[i] && costs[i] <= min){
-                min = costs[i];
-                minIndex = i;
-            }
-        }
-        return minIndex;
-    }
 
-    private class Edge{
-        int src;
-        int dest;
-        int weight;
-        public Edge(int src , int dest , int weight){
-            this.src = src;
-            this.dest = dest;
-            this.weight = weight;
-        }
-    }
 }
