@@ -1,64 +1,127 @@
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter path to graph file: ");
-        String path = scanner.nextLine();
-        Graph g = new Graph(path);
 
-        int[] costs = new int[g.size()];
-        int[] parents = new int[g.size()];
-        boolean result;
-
-        // Test Dijkstra's algorithm
-        int source = 0;
-        //int[] costs = new int[g.size()];
-        //int[] parents = new int[g.size()];
-        g.dijkstra(source, costs, parents);
-        System.out.println("Dijkstra's algorithm results:");
-        System.out.println("Costs: " + Arrays.toString(costs));
-        System.out.println("Parents: " + Arrays.toString(parents));
-        System.out.println("--------------------------------------------");
-        
-        // Test Bellman-Ford algorithm
-        int[] costs2 = new int[g.size()];
-        int[] parents2 = new int[g.size()];
-        boolean hasNegativeCycle = g.bellmanFord(source, costs2, parents2);
-        System.out.println("bellmanFord's algorithm results:");
-        if (hasNegativeCycle) {
-            System.out.println("No negative cycle found");
-            System.out.println("Costs: " + Arrays.toString(costs2));
-            System.out.println("Parents: " + Arrays.toString(parents2));
-        } else {
-            System.out.println("Negative cycle found");
-        }
-        System.out.println("--------------------------------------------");
-
-        // Floyd-Warshall algorithm
-        int[][] costsMatrix = new int[g.size()][g.size()];
-        int[][] predecessorsMatrix = new int[g.size()][g.size()];
-        result = g.floydWarshall(costsMatrix, predecessorsMatrix);
-
-        System.out.println("FloydWarshall's algorithm results:");
-        if (result) {
-            for (int i = 0; i < g.size(); i++) {
-                for (int j = 0; j < g.size(); j++) {
-                    System.out.print(costsMatrix[i][j] + " ");
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Enter the path of the file: ");
+            String filePath = scanner.nextLine();
+            Graph graph = new Graph(filePath);
+            boolean running = true;
+            while (running) {
+                System.out.println("Main Menu:");
+                System.out.println("1. Find shortest paths from a source node");
+                System.out.println("2. Check if the graph contains a negative cycle");
+                System.out.println("3. Exit");
+                System.out.print("Enter your choice: ");
+                int choice = scanner.nextInt();
+                scanner.nextLine(); // consume newline character
+                switch (choice) {
+                    case 1:
+                        System.out.print("Enter the source node: ");
+                        int sourceNode = scanner.nextInt();
+                        scanner.nextLine(); // consume newline character
+                        System.out.println("Choose an algorithm:");
+                        System.out.println("1. Dijkstra");
+                        System.out.println("2. Bellman-Ford");
+                        System.out.println("3. Floyd-Warshall");
+                        System.out.print("Enter your choice: ");
+                        int algorithm = scanner.nextInt();
+                        scanner.nextLine(); // consume newline character
+                        switch (algorithm) {
+                            case 1:
+                                int[] dijkstraCosts = new int[graph.size()];
+                                int[] dijkstraParents = new int[graph.size()];
+                                graph.dijkstra(sourceNode, dijkstraCosts, dijkstraParents);
+                                boolean runningDijkstra = true;
+                                while (runningDijkstra) {
+                                    System.out.println("Dijkstra Menu:");
+                                    System.out.println("1. Get cost of a path from a specific node");
+                                    System.out.println("2. Get the path from a specific node");
+                                    System.out.println("3. Exit");
+                                    System.out.print("Enter your choice: ");
+                                    int dijkstraChoice = scanner.nextInt();
+                                    scanner.nextLine(); // consume newline character
+                                    switch (dijkstraChoice) {
+                                        case 1:
+                                            System.out.print("Enter the target node: ");
+                                            int targetNode = scanner.nextInt();
+                                            scanner.nextLine(); // consume newline character
+                                            System.out.println("Cost of the path: " + dijkstraCosts[targetNode]);
+                                            break;
+                                        case 2:
+                                            System.out.print("Enter the target node: ");
+                                            int targetNode2 = scanner.nextInt();
+                                            scanner.nextLine(); // consume newline character
+                                            System.out.print("Path: ");
+                                            int currentNode = targetNode2;
+                                            while (currentNode != sourceNode) {
+                                                System.out.print(currentNode + " ");
+                                                currentNode = dijkstraParents[currentNode];
+                                            }
+                                            System.out.print(sourceNode);
+                                            System.out.println();
+                                            break;
+                                        case 3:
+                                            runningDijkstra = false;
+                                            break;
+                                        default:
+                                            System.out.println("Invalid choice");
+                                            break;
+                                    }
+                                }
+                                break;
+                            case 2:
+                                int[] bellmanFordCosts = new int[graph.size()];
+                                int[] bellmanFordParents = new int[graph.size()];
+                                boolean hasNegativeCycle = graph.bellmanFord(sourceNode, bellmanFordCosts, bellmanFordParents);
+                                System.out.println("Has negative cycle: " + !hasNegativeCycle);
+                                break;
+                            case 3:
+                                int[][] floydWarshallCosts = new int[graph.size()][graph.size()];
+                                int[][] floydWarshallPredecessors = new int[graph.size()][graph.size()];
+                                boolean hasNegativeCycle2 = graph.floydWarshall(floydWarshallCosts, floydWarshallPredecessors);
+                                System.out.println("Has negative cycle: " + !hasNegativeCycle2);
+                                break;
+                            default:
+                                System.out.println("Invalid choice");
+                                break;
+                        }
+                        break;
+                    case 2:
+                        System.out.println("Choose an algorithm:");
+                        System.out.println("1. Bellman-Ford");
+                        System.out.println("2. Floyd-Warshall");
+                        System.out.print("Enter your choice: ");
+                        int algorithm2 = scanner.nextInt();
+                        scanner.nextLine(); // consume newline character
+                        switch (algorithm2) {
+                            case 1:
+                                int[] bellmanFordCosts = new int[graph.size()];
+                                int[] bellmanFordParents = new int[graph.size()];
+                                boolean hasNegativeCycle = graph.bellmanFord(0, bellmanFordCosts, bellmanFordParents);
+                                System.out.println("Has negative cycle: " + hasNegativeCycle);
+                                break;
+                            case 2:
+                                int[][] floydWarshallCosts = new int[graph.size()][graph.size()];
+                                int[][] floydWarshallPredecessors = new int[graph.size()][graph.size()];
+                                boolean hasNegativeCycle2 = graph.floydWarshall(floydWarshallCosts, floydWarshallPredecessors);
+                                System.out.println("Has negative cycle: " + hasNegativeCycle2);
+                                break;
+                            default:
+                                System.out.println("Invalid choice");
+                                break;
+                        }
+                        break;
+                    case 3:
+                        running = false;
+                        break;
+                    default:
+                        System.out.println("Invalid choice");
+                        break;
                 }
-                System.out.println();
             }
-            for (int i = 0; i < g.size(); i++) {
-                for (int j = 0; j < g.size(); j++) {
-                    System.out.print(predecessorsMatrix[i][j] + " ");
-                }
-                System.out.println();
-            }
-        } else {
-            System.out.println("Negative cycle found");
-        }
+
+
     }
-
-
 }
